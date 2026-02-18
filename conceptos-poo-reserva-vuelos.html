@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Conceptos POO — Sistema de Reserva de Vuelos</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;700;800;900&display=swap');
+
+  :root {
+    --bg:       #0b0d12;
+    --surface:  #11141c;
+    --card:     #161a24;
+    --border:   #1e2535;
+    --border2:  #252d40;
+    --blue:     #5b9cf6;
+    --green:    #3ecf8e;
+    --orange:   #f59e4f;
+    --purple:   #a78bfa;
+    --red:      #f87171;
+    --yellow:   #fbbf24;
+    --cyan:     #22d3ee;
+    --text:     #e2e8f0;
+    --muted:    #64748b;
+    --dim:      #94a3b8;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    min-height: 100vh;
+  }
+
+  /* ── SIDEBAR ─────────────────────────────── */
+  nav {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 2rem 0;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+
+  .nav-header {
+    padding: 0 1.5rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 1rem;
+  }
+  .nav-header h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: #fff;
+    line-height: 1.3;
+  }
+  .nav-header p {
+    font-size: 0.6rem;
+    color: var(--muted);
+    margin-top: 0.3rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .nav-section {
+    padding: 0.3rem 1rem 0.8rem;
+  }
+  .nav-section-title {
+    font-size: 0.52rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    padding: 0 0.5rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.45rem 0.6rem;
+    border-radius: 5px;
+    font-size: 0.65rem;
+    cursor: pointer;
+    color: var(--dim);
+    transition: all 0.15s;
+    border: 1px solid transparent;
+    text-decoration: none;
+  }
+  .nav-item:hover { background: var(--card); color: var(--text); }
+  .nav-item.active { background: var(--card); color: var(--text); border-color: var(--border2); }
+  .nav-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* ── MAIN CONTENT ────────────────────────── */
+  main {
+    padding: 3rem 3.5rem;
+    max-width: 900px;
+  }
+
+  .page-header {
+    margin-bottom: 3rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .page-header .tag {
+    display: inline-block;
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.25rem 0.7rem;
+    border-radius: 3px;
+    background: #5b9cf615;
+    color: var(--blue);
+    border: 1px solid #5b9cf630;
+    margin-bottom: 1rem;
+  }
+  .page-header h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: 2.2rem;
+    font-weight: 900;
+    color: #fff;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+  }
+  .page-header p {
+    margin-top: 0.8rem;
+    font-size: 0.72rem;
+    color: var(--dim);
+    line-height: 1.7;
+    max-width: 600px;
+  }
+
+  /* ── CONCEPT SECTION ─────────────────────── */
+  .concept {
+    margin-bottom: 4rem;
+    scroll-margin-top: 2rem;
+  }
+
+  .concept-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .concept-icon {
+    width: 42px; height: 42px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+  .concept-title h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.02em;
+  }
+  .concept-title .subtitle {
+    font-size: 0.62rem;
+    color: var(--muted);
+    margin-top: 0.2rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .concept p {
+    font-size: 0.72rem;
+    line-height: 1.85;
+    color: var(--dim);
+    margin-bottom: 1rem;
+  }
+  .concept p strong { color: var(--text); font-weight: 600; }
+
+  /* ── CODE BLOCK ──────────────────────────── */
+  .code-block {
+    background: #0d101a;
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 1.2rem 0;
+  }
+  .code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.6rem 1rem;
+    background: #13172200;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.58rem;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .code-dots { display: flex; gap: 5px; }
+  .code-dots span { width: 8px; height: 8px; border-radius: 50%; }
+  pre {
+    padding: 1.2rem 1.4rem;
+    font-size: 0.68rem;
+    line-height: 1.75;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ── SYNTAX COLORS ───────────────────────── */
+  .kw   { color: #a78bfa; }   /* keywords */
+  .typ  { color: #22d3ee; }   /* types */
+  .str  { color: #86efac; }   /* strings */
+  .num  { color: #fbbf24; }   /* numbers */
+  .cmt  { color: #3d5070; font-style: italic; }   /* comments */
+  .ann  { color: #f59e4f; }   /* annotations */
+  .mth  { color: #5b9cf6; }   /* methods */
+  .cls  { color: #34d399; }   /* class names */
+
+  /* ── CALLOUT BOXES ───────────────────────── */
+  .callout {
+    border-radius: 7px;
+    padding: 1rem 1.2rem;
+    margin: 1.2rem 0;
+    font-size: 0.68rem;
+    line-height: 1.7;
+    display: flex;
+    gap: 0.8rem;
+  }
+  .callout-icon { font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+  .callout.info    { background: #5b9cf610; border: 1px solid #5b9cf625; color: #93c5fd; }
+  .callout.warn    { background: #fbbf2410; border: 1px solid #fbbf2425; color: #fde68a; }
+  .callout.success { background: #3ecf8e10; border: 1px solid #3ecf8e25; color: #6ee7b7; }
+  .callout.danger  { background: #f8717110; border: 1px solid #f8717125; color: #fca5a5; }
+  .callout strong  { font-weight: 700; }
+
+  /* ── COMPARISON TABLE ────────────────────── */
+  .compare-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.65rem;
+    margin: 1.2rem 0;
+  }
+  .compare-table th {
+    padding: 0.6rem 1rem;
+    text-align: left;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    font-size: 0.58rem;
+    border-bottom: 1px solid var(--border2);
+  }
+  .compare-table td {
+    padding: 0.6rem 1rem;
+    border-bottom: 1px solid var(--border);
+    color: var(--dim);
+    vertical-align: top;
+    line-height: 1.6;
+  }
+  .compare-table tr:last-child td { border-bottom: none; }
+  .compare-table .good { color: var(--green); }
+  .compare-table .bad  { color: var(--red); }
+  .compare-table .neu  { color: var(--yellow); }
+
+  /* ── INLINE CODE ─────────────────────────── */
+  code {
+    background: #1a1f2e;
+    padding: 0.1rem 0.4rem;
+    border-radius: 3px;
+    font-size: 0.85em;
+    color: var(--cyan);
+    border: 1px solid var(--border2);
+  }
+
+  /* ── DIVIDER ─────────────────────────────── */
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 3rem 0;
+  }
+
+  /* ── HIGHLIGHT CHIP ──────────────────────── */
+  .chip {
+    display: inline-block;
+    padding: 0.15rem 0.55rem;
+    border-radius: 4px;
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    vertical-align: middle;
+    margin: 0 2px;
+  }
+  .chip-blue   { background:#5b9cf615; color:var(--blue);   border:1px solid #5b9cf630; }
+  .chip-green  { background:#3ecf8e15; color:var(--green);  border:1px solid #3ecf8e30; }
+  .chip-purple { background:#a78bfa15; color:var(--purple); border:1px solid #a78bfa30; }
+  .chip-orange { background:#f59e4f15; color:var(--orange); border:1px solid #f59e4f30; }
+  .chip-red    { background:#f8717115; color:var(--red);    border:1px solid #f8717130; }
+  .chip-yellow { background:#fbbf2415; color:var(--yellow); border:1px solid #fbbf2430; }
+
+  /* ── SUMMARY CARD ────────────────────────── */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 1.2rem;
+  }
+  .summary-card {
+    background: var(--card);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    padding: 1rem;
+  }
+  .summary-card h4 {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+  .summary-card p {
+    font-size: 0.62rem !important;
+    margin-bottom: 0 !important;
+  }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- ── SIDEBAR ──────────────────────────────────────────────── -->
+<nav>
+  <div class="nav-header">
+    <h2>Conceptos POO</h2>
+    <p>Sistema de Reserva de Vuelos</p>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-title">Modificadores</div>
+    <a class="nav-item active" href="#private-final">
+      <span class="nav-dot" style="background:var(--blue)"></span>private final
+    </a>
+    <a class="nav-item" href="#encapsulamiento">
+      <span class="nav-dot" style="background:var(--purple)"></span>Encapsulamiento
+    </a>
+    <a class="nav-item" href="#getters-setters">
+      <span class="nav-dot" style="background:var(--cyan)"></span>Getters y Setters
+    </a>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-title">Herencia y Contratos</div>
+    <a class="nav-item" href="#interfaces">
+      <span class="nav-dot" style="background:var(--green)"></span>Interfaces
+    </a>
+    <a class="nav-item" href="#override">
+      <span class="nav-dot" style="background:var(--orange)"></span>@Override
+    </a>
+    <a class="nav-item" href="#implements">
+      <span class="nav-dot" style="background:var(--yellow)"></span>implements
+    </a>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-title">Diseño</div>
+    <a class="nav-item" href="#inyeccion">
+      <span class="nav-dot" style="background:var(--red)"></span>Inyección de dep.
+    </a>
+    <a class="nav-item" href="#interface-vs-herencia">
+      <span class="nav-dot" style="background:var(--purple)"></span>Interface vs Herencia
+    </a>
+    <a class="nav-item" href="#resumen">
+      <span class="nav-dot" style="background:var(--green)"></span>Resumen general
+    </a>
+  </div>
+</nav>
+
+<!-- ── MAIN ─────────────────────────────────────────────────── -->
+<main>
+
+  <div class="page-header">
+    <div class="tag">📚 Guía de conceptos POO</div>
+    <h1>Conceptos generales<br>de POO en el código</h1>
+    <p>Explicación de cada concepto del paradigma orientado a objetos que aparece en el Sistema de Reserva de Vuelos, con ejemplos directamente del código que ya escribiste.</p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- 1. PRIVATE FINAL -->
+  <!-- ═══════════════════════════════════════════ -->
+  <section class="concept" id="private-final">
+    <div class="concept-header">
+      <div class="concept-icon" style="background:#5b9cf615; border:1px solid #5b9cf630; color:var(--blue)">🔒</div>
+      <div class="concept-title">
+        <h2><code>private final</code></h2>
+        <div class="subtitle">Modificador de acceso + Modificador de valor</div>
+      </div>
+    </div>
+
+    <p>Son dos palabras clave distintas que casi siempre van juntas en atributos de clase. Cada una hace una cosa diferente:</p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span style="background:#f87171"></span><span style="background:#fbbf24"></span><span style="background:#34d399"></span></div>
+        ServicioReservas.java
+      </div>
+      <pre><span class="kw">private final</span> <span class="cls">IRepositorioVuelos</span> repositorioVuelos;
+<span class="kw">private final</span> <span class="cls">IProcesadorPago</span>     procesadorPago;
+<span class="kw">private final</span> <span class="cls">IServicioNotificacion</span> servicioNotificacion;</pre>
+    </div>
+
+    <p><strong>private</strong> significa que ese atributo <strong>solo puede ser visto y usado desde dentro de la misma clase</strong>. Nadie de afuera puede tocarlo directamente. Si alguien intenta hacer <code>servicio.repositorioVuelos</code> desde otra clase, el compilador lanza un error.</p>
+
+    <p><strong>final</strong> significa que <strong>una vez que se le asigna un valor, ese valor no puede cambiar</strong>. Es como declarar una constante para ese atributo. En nuestro caso, el repositorio, el procesador de pago y el notificador se asignan en el constructor y nunca se reemplazan durante la vida del objeto.</p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span style="background:#f87171"></span><span style="background:#fbbf24"></span><span style="background:#34d399"></span></div>
+        ¿Por qué usamos final aquí?
+      </div>
+      <pre><span class="kw">public</span> <span class="cls">ServicioReservas</span>(<span class="cls">IRepositorioVuelos</span> repositorio,
+                         <span class="cls">IProcesadorPago</span> procesador,
+                         <span class="cls">IServicioNotificacion</span> notificador) {
+    <span class="cmt">// Se asignan UNA SOLA VEZ aquí</span>
+    <span class="kw">this</span>.repositorioVuelos    = repositorio;
+    <span class="kw">this</span>.procesadorPago        = procesador;
+    <span class="kw">this</span>.servicioNotificacion  = notificador;
+    <span class="cmt">// Ya no se pueden reasignar en ningún otro método</span>
+}</pre>
+    </div>
+
+    <div class="callout success">
+      <span class="callout-icon">✅</span>
+      <div><strong>Buena práctica:</strong> Usar <code>private final</code> en atributos que se inyectan por constructor garantiza que el objeto sea <strong>inmutable en sus dependencias</strong>. Esto hace el código más predecible, más fácil de probar y elimina errores de estado inesperado.</div>
+    </div>
+
+    <div class="callout warn">
+      <span class="callout-icon">⚠️</span>
+      <div><strong>¿Cuándo NO usar final?</strong> En atributos que necesitan cambiar durante la vida del objeto, como <code>asientosDisponibles</code> en <code>Vuelo</code> o <code>estado</code> en <code>Reserva</code>, que tienen su propio setter para actualizarse.</div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- 2. ENCAPSULAMIENTO -->
+  <!-- ═══════════════════════════════════════════ -->
+  <section class="concept" id="encapsulamiento">
+    <div class="concept-header">
+      <div class="concept-icon" style="background:#a78bfa15; border:1px solid #a78bfa30; color:var(--purple)">📦</div>
+      <div class="concept-title">
+        <h2>Encapsulamiento</h2>
+        <div class="subtitle">Uno de los 4 pilares de la POO</div>
+      </div>
+    </div>
+
+    <p>El encapsulamiento es el principio de <strong>ocultar los detalles internos de una clase</strong> y exponer solo lo que el mundo exterior necesita saber. Es como una cápsula: por fuera ves la interfaz, por dentro están los datos protegidos.</p>
+
+    <p>En nuestro código, todos los atributos son <code>private</code> y el acceso se da únicamente a través de métodos públicos controlados:</p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span style="background:#f87171"></span><span style="background:#fbbf24"></span><span style="background:#34d399"></span></div>
+        Vuelo.java — Encapsulamiento en acción
+      </div>
+      <pre><span class="kw">public class</span> <span class="cls">Vuelo</span> {
+
+    <span class="cmt">// ❌ Nadie de afuera puede leer ni escribir esto directamente</span>
+    <span class="kw">private</span> <span class="typ">String</span>    idVuelo;
+    <span class="kw">private</span> <span class="typ">double</span>    precio;
+    <span class="kw">private</span> <span class="typ">int</span>       asientosDisponibles;
+
+    <span class="cmt">// ✅ Sí pueden leer a través de estos métodos controlados</span>
+    <span class="kw">public</span> <span class="typ">String</span> <span class="mth">getIdVuelo</span>()          { <span class="kw">return</span> idVuelo; }
+    <span class="kw">public</span> <span class="typ">double</span> <span class="mth">getPrecio</span>()            { <span class="kw">return</span> precio; }
+    <span class="kw">public</span> <span class="typ">int</span>    <span class="mth">getAsientosDisponibles</span>() { <span class="kw">return</span> asientosDisponibles; }
+
+    <span class="cmt">// ✅ Solo se permite MODIFICAR asientos (no el precio ni el ID)</span>
+    <span class="kw">public void</span> <span class="mth">setAsientosDisponibles</span>(<span class="typ">int</span> asientos) {
+        <span class="kw">this</span>.asientosDisponibles = asientos;
+    }
+}</pre>
+    </div>
+
+    <div class="callout info">
+      <span class="callout-icon">💡</span>
+      <div>Nota que <code>precio</code> e <code>idVuelo</code> <strong>no tienen setter</strong> intencionalmente. Una vez creado el vuelo, su precio e ID no deben cambiar. El encapsulamiento nos permite tomar esa decisión de diseño y forzarla.</div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- 3. GETTERS Y SETTERS -->
+  <!-- ═══════════════════════════════════════════ -->
+  <section class="concept" id="getters-setters">
+    <div class="concept-header">
+      <div class="concept-icon" style="background:#22d3ee15; border:1px solid #22d3ee30; color:var(--cyan)">↕️</div>
+      <div class="concept-title">
+        <h2>Getters y Setters</h2>
+        <div class="subtitle">Métodos de acceso controlado</div>
+      </div>
+    </div>
+
+    <p>Son métodos cuya única función es <strong>leer</strong> (getter) o <strong>escribir</strong> (setter) un atributo privado. Son la puerta controlada al encapsulamiento.</p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span style="background:#f87171"></span><span style="background:#fbbf24"></span><span style="background:#34d399"></span></div>
+        Convención de nombres en Java
+      </div>
+      <pre><span class="cmt">// GETTER: get + NombreAtributo (con mayúscula)</span>
+<span class="kw">public</span> <span class="typ">String</span> <span class="mth">getNombre</span>()  { <span class="kw">return</span> nombre; }
+<span class="kw">public</span> <span class="typ">double</span> <span class="mth">getPrecio</span>()  { <span class="kw">return</span> precio; }
+
+<span class="cmt">// SETTER: set + NombreAtributo (con mayúscula)</span>
+<span class="kw">public void</span> <span class="mth">setEstado</span>(<span class="typ">String</span> estado) {
+    <span class="kw">this</span>.estado = estado;
+}
+
+<span class="cmt">// GETTER con validación (el gran beneficio)</span>
+<span class="kw">public</span> <span class="typ">int</span> <span class="mth">getAsientosDisponibles</span>() {
+    <span class="kw">return</span> asientosDisponibles;
+}
+
+<span class="cmt">// SETTER con validación (nunca asientos negativos)</span>
+<span class="kw">public void</span> <span class="mth">setAsientosDisponibles</span>(<span class="typ">int</span> asientos) {
+    <span class="kw">if</span> (asientos >= <span class="num">0</span>) {
+        <span class="kw">this</span>.asientosDisponibles = asientos;
+    }
+}</pre>
+    </div>
+
+    <p>La ventaja real de los setters es que puedes agregar <strong>validaciones sin que el código externo cambie</strong>. Si mañana decides que los asientos no pueden superar 500, lo agregas en un solo lugar: el setter.</p>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- 4. INTERFACES -->
+  <!-- ═══════════════════════════════════════════ -->
+  <section class="concept" id="interfaces">
+    <div class="concept-header">
+      <div class="concept-icon" style="background:#3ecf8e15; border:1px solid #3ecf8e30; color:var(--green)">📋</div>
+      <div class="concept-title">
+        <h2>Interfaces</h2>
+        <div class="subtitle">Contratos entre clases</div>
+      </div>
+    </div>
+
+    <p>Una interfaz es un <strong>contrato</strong>: define qué métodos debe tener una clase, pero no cómo los implementa. Es como un acuerdo que dice "quien firme este contrato, debe cumplir con estos métodos".</p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span style="background:#f87171"></span><span style="background:#fbbf24"></span><span style="background:#34d399"></span></div>
+        IProcesadorPago.java — Definición de interfaz
+      </div>
+      <pre><span class="cmt">// Una interfaz SOLO declara el "qué", nunca el "cómo"</span>
+<span class="kw">public interface</span> <span class="cls">IProcesadorPago</span> {
+
+    <span class="cmt">// Sin cuerpo: solo la firma del método</span>
+    <span class="typ">boolean</span> <span class="mth">procesarPago</span>(<span class="typ">double</span> monto);
+
+    <span class="cmt">// Todos los métodos en una interfaz son implícitamente public abstract</span>
+}</pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span style="background:#f87171"></span><span style="background:#fbbf24"></span><span style="background:#34d399"></span></div>
+        ProcesadorPagoTarjeta.java — Clase que "firma el contrato"
+      </div>
+      <pre><span class="cmt">// implements = "me comprometo a cumplir el contrato"</span>
+<span class="kw">public class</span> <span class="cls">ProcesadorPagoTarjeta</span> <span class="kw">implements</span> <span class="cls">IProcesadorPago</span> {
+
+    <span class="ann">@Override</span>
+    <span class="kw">public</span> <span class="typ">boolean</span> <span class="mth">procesarPago</span>(<span class="typ">double</span> monto) {
+        <span class="cmt">// Aquí SÍ se define el CÓMO, específico para tarjeta</span>
+        System.out.<span class="mth">println</span>(<span class="str">"Procesando con tarjeta..."</span>);
+        <span class="kw">return true</span>;
+    }
+}</pre>
+    </div>
+
+    <div class="callout success">
+      <span class="callout-icon">🎯</span>
+      <div><strong>La clave:</strong> <code>ServicioReservas</code> solo conoce <code>IProcesadorPago</code>. No sabe si por dentro es tarjeta, PayPal, criptomoneda o cualquier otro. Solo sabe que puede llamar a <code>procesarPago()</code> y funcionará.</div>
+    </div>
+
+    <p>Las <strong>tres interfaces de nuestro sistema</strong> y lo que representan:</p>
+
+    <div class="summary-grid">
+      <div class="summary-card" style="border-color:#a78bfa30">
+        <h4 style="color:var(--purple)">IRepositorioVuelos</h4>
+        <p>Contrato para guardar y buscar vuelos. No importa si es memoria, MySQL o MongoDB.</p>
+      </div>
+      <div class="summary-card" style="border-color:#fbbf2430">
+        <h4 style="color:var(--yellow)">IProcesadorPago</h4>
+        <p>Contrato para procesar pagos. No importa si es tarjeta, PayPal o transferencia.</p>
+      </div>
+      <div class="summary-card" style="border-color:#f5945030">
+        <h4 style="color:var(--orange)">IServicioNotificacion</h4>
+        <p>Contrato para notificar. No importa si es email, SMS o WhatsApp.</p>
+      </div>
+      <div class="summary-card" style="border-color:#3ecf8e30" style="grid-column: span 1">
+        <h4 style="color:var(--green)">Beneficio compartido</h4>
+        <p>Las tres permiten cambiar la implementación sin tocar <code>ServicioReservas</code>.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- 5. @OVERRIDE -->
+  <!-- ═══════════════════════════════════════════ -->
+  <section class="concept" id="override">
+    <div class="concept-header">
+      <div class="concept-icon" style="background:#f59e4f15; border:1px solid #f59e4f30; color:var(--orange)">🔁</div>
+      <div class="concept-title">
+        <h2><code>@Override</code></h2>
+        <div class="subtitle">Anotación de sobreescritura</div>
+      </div>
+    </div>
+
+    <p><code>@Override</code> es una <strong>anotación</strong> que le dice al compilador de Java: <em>"este método está sobreescribiendo un método de una interfaz o clase padre"</em>. Es opcional, pero muy importante usarla siempre.</p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span style="background:#f87171"></span><span style="background:#fbbf24"></span><span style="background:#34d399"></span></div>
+        ServicioNotificacionEmail.java
+      </div>
+      <pre><span class="kw">public class</span> <span class="cls">ServicioNotificacionEmail</span> <span class="kw">implements</span> <span class="cls">IServicioNotificacion</span> {
+
+    <span class="ann">@Override</span>  <span class="cmt">// ← Le dice al compilador que este método viene de la interfaz</span>
+    <span class="kw">public void</span> <span class="mth">enviarNotificacion</span>(<span class="typ">String</span> destinatario, <span class="typ">String</span> mensaje) {
+        System.out.<span class="mth">println</span>(<span class="str">"📧 Enviando CORREO a: "</span> + destinatario);
+        System.out.<span class="mth">println</span>(<span class="str">"   Mensaje: "</span> + mensaje);
+    }
+}</pre>
+    </div>
+
+    <p>¿Por qué es importante ponerlo aunque sea opcional?</p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span style="background:#f87171"></span><span style="background:#fbbf24"></span><span style="background:#34d399"></span></div>
+        Sin @Override — El compilador no detecta el error
+      </div>
+      <pre><span class="cmt">// Supón que la interfaz define: enviarNotificacion(String, String)</span>
+<span class="cmt">// y tú escribes mal el nombre del método sin @Override:</span>
+
+<span class="kw">public void</span> <span class="mth">enviarNotificaciones</span>(<span class="typ">String</span> dest, <span class="typ">String</span> msg) {  <span class="cmt">// ← Typo: "es" al final</span>
+    <span class="cmt">// Java NO lanza error: cree que es un método NUEVO de esta clase</span>
+    <span class="cmt">// El contrato de la interfaz queda sin implementar → Bug silencioso</span>
+}
+
+<span class="cmt">// CON @Override, el compilador lanza error inmediatamente:</span>
+<span class="ann">@Override</span>
+<span class="kw">public void</span> <span class="mth">enviarNotificaciones</span>(...) {  <span class="cmt">// ← Error: no existe en la interfaz</span>
+    <span class="cmt">// Compilación falla → detectamos el error antes de ejecutar</span>
+}</pre>
+    </div>
+
+    <div class="callout info">
+      <span class="callout-icon">💡</span>
+      <div><strong>Regla de oro:</strong> Siempre escribe <code>@Override</code> cuando implementes métodos de una interfaz o sobreescribas métodos de una clase padre. Te protege de errores de tipeo que de otra forma serían muy difíciles de detectar.</div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- 6. IMPLEMENTS -->
+  <!-- ═══════════════════════════════════════════ -->
+  <section class="concept" id="implements">
+    <div class="concept-header">
+      <div class="concept-icon" style="background:#fbbf2415; border:1px solid #fbbf2430; color:var(--yellow)">✍️</div>
+      <div class="concept-title">
+        <h2><code>implements</code></h2>
+        <div class="subtitle">Firma del contrato de interfaz</div>
+      </div>
+    </div>
+
+    <p>La palabra clave <code>implements</code> declara que una clase <strong>se compromete a implementar todos los métodos de una interfaz</strong>. Si la clase no implementa algún método de la interfaz, el compilador lanza un error.</p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span style="background:#f87171"></span><span style="background:#fbbf24"></span><span style="background:#34d399"></span></div>
+        Todas las implementaciones del sistema
+      </div>
+      <pre><span class="cmt">// Repositorio</span>
+<span class="kw">public class</span> <span class="cls">RepositorioVuelosEnMemoria</span> <span class="kw">implements</span> <span class="cls">IRepositorioVuelos</span> { ... }
+
+<span class="cmt">// Procesadores de pago</span>
+<span class="kw">public class</span> <span class="cls">ProcesadorPagoTarjeta</span> <span class="kw">implements</span> <span class="cls">IProcesadorPago</span> { ... }
+<span class="kw">public class</span> <span class="cls">ProcesadorPagoPaypal</span>  <span class="kw">implements</span> <span class="cls">IProcesadorPago</span> { ... }
+
+<span class="cmt">// Notificaciones</span>
+<span class="kw">public class</span> <span class="cls">ServicioNotificacionEmail</span> <span class="kw">implements</span> <span class="cls">IServicioNotificacion</span> { ... }
+<span class="kw">public class</span> <span class="cls">ServicioNotificacionSMS</span>   <span class="kw">implements</span> <span class="cls">IServicioNotificacion</span> { ... }
+
+<span class="cmt">// Una clase puede implementar MÚLTIPLES interfaces a la vez</span>
+<span class="kw">public class</span> <span class="cls">ServicioCompleto</span> <span class="kw">implements</span> <span class="cls">IProcesadorPago</span>, <span class="cls">IServicioNotificacion</span> { ... }</pre>
+    </div>
+
+    <div class="callout success">
+      <span class="callout-icon">🔑</span>
+      <div><strong>Diferencia con <code>extends</code>:</strong> En Java una clase solo puede hacer <code>extends</code> de <strong>una sola clase</strong>, pero puede hacer <code>implements</code> de <strong>múltiples interfaces</strong> al mismo tiempo. Esta es una razón clave por la que las interfaces son más flexibles que la herencia.</div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- 7. INYECCIÓN DE DEPENDENCIAS -->
+  <!-- ═══════════════════════════════════════════ -->
+  <section class="concept" id="inyeccion">
+    <div class="concept-header">
+      <div class="concept-icon" style="background:#f8717115; border:1px solid #f8717130; color:var(--red)">💉</div>
+      <div class="concept-title">
+        <h2>Inyección de Dependencias</h2>
+        <div class="subtitle">DIP en la práctica — "No lo busques, pídelo"</div>
+      </div>
+    </div>
+
+    <p>La inyección de dependencias es una técnica donde <strong>una clase no crea sus propias dependencias</strong>, sino que las recibe desde afuera, generalmente por el constructor. Esto es exactamente lo que hace nuestro sistema.</p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span style="background:#f87171"></span><span style="background:#fbbf24"></span><span style="background:#34d399"></span></div>
+        ❌ Sin inyección (forma incorrecta — acoplamiento fuerte)
+      </div>
+      <pre><span class="kw">public class</span> <span class="cls">ServicioReservas</span> {
+
+    <span class="cmt">// La clase SE CREA sus propias dependencias</span>
+    <span class="kw">private</span> <span class="cls">ProcesadorPagoTarjeta</span> procesador = <span class="kw">new</span> <span class="cls">ProcesadorPagoTarjeta</span>();
+    <span class="kw">private</span> <span class="cls">ServicioNotificacionEmail</span> notif = <span class="kw">new</span> <span class="cls">ServicioNotificacionEmail</span>();
+
+    <span class="cmt">// ❌ Problemas:</span>
+    <span class="cmt">// - Imposible cambiar a PayPal sin modificar esta clase</span>
+    <span class="cmt">// - Imposible probar con mocks o implementaciones falsas</span>
+    <span class="cmt">// - Viola OCP, DIP y SRP</span>
+}</pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span style="background:#f87171"></span><span style="background:#fbbf24"></span><span style="background:#34d399"></span></div>
+        ✅ Con inyección por constructor (forma correcta)
+      </div>
+      <pre><span class="kw">public class</span> <span class="cls">ServicioReservas</span> {
+
+    <span class="cmt">// Atributos tipados como INTERFACES (abstracciones)</span>
+    <span class="kw">private final</span> <span class="cls">IProcesadorPago</span>     procesadorPago;
+    <span class="kw">private final</span> <span class="cls">IServicioNotificacion</span> servicioNotificacion;
+
+    <span class="cmt">// Las dependencias LLEGAN desde afuera</span>
+    <span class="kw">public</span> <span class="cls">ServicioReservas</span>(<span class="cls">IProcesadorPago</span> procesador,
+                            <span class="cls">IServicioNotificacion</span> notificador) {
+        <span class="kw">this</span>.procesadorPago       = procesador;
+        <span class="kw">this</span>.servicioNotificacion = notificador;
+    }
+}
+
+<span class="cmt">// En Principal.java: quien ENSAMBLA decide qué implementación usar</span>
+<span class="cls">ServicioReservas</span> s1 = <span class="kw">new</span> <span class="cls">ServicioReservas</span>(
+    <span class="kw">new</span> <span class="cls">ProcesadorPagoTarjeta</span>(),    <span class="cmt">// ← Hoy: tarjeta</span>
+    <span class="kw">new</span> <span class="cls">ServicioNotificacionEmail</span>()  <span class="cmt">// ← Hoy: email</span>
+);
+
+<span class="cls">ServicioReservas</span> s2 = <span class="kw">new</span> <span class="cls">ServicioReservas</span>(
+    <span class="kw">new</span> <span class="cls">ProcesadorPagoPaypal</span>(),      <span class="cmt">// ← Mañana: PayPal</span>
+    <span class="kw">new</span> <span class="cls">ServicioNotificacionSMS</span>()    <span class="cmt">// ← Mañana: SMS</span>
+);</pre>
+    </div>
+
+    <div class="callout info">
+      <span class="callout-icon">💡</span>
+      <div><code>ServicioReservas</code> no sabe ni le importa si está trabajando con tarjeta o PayPal. Solo llama a <code>procesarPago()</code> y confía en que quien sea que llegó como dependencia, cumple el contrato de <code>IProcesadorPago</code>.</div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- 8. INTERFACE VS HERENCIA -->
+  <!-- ═══════════════════════════════════════════ -->
+  <section class="concept" id="interface-vs-herencia">
+    <div class="concept-header">
+      <div class="concept-icon" style="background:#a78bfa15; border:1px solid #a78bfa30; color:var(--purple)">⚖️</div>
+      <div class="concept-title">
+        <h2>Interface vs Herencia</h2>
+        <div class="subtitle">¿Cuándo usar cada una?</div>
+      </div>
+    </div>
+
+    <p>La herencia (<code>extends</code>) y las interfaces (<code>implements</code>) son dos mecanismos para reutilizar comportamiento, pero tienen filosofías completamente distintas. La pregunta que debes hacerte siempre es:</p>
+
+    <div class="callout warn">
+      <span class="callout-icon">🤔</span>
+      <div>
+        <strong>¿Esta clase ES UN tipo de la clase padre?</strong> → Usa herencia (<code>extends</code>)<br>
+        <strong>¿Esta clase PUEDE HACER algo que define la interfaz?</strong> → Usa interfaz (<code>implements</code>)
+      </div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span style="background:#f87171"></span><span style="background:#fbbf24"></span><span style="background:#34d399"></span></div>
+        Ejemplo comparativo
+      </div>
+      <pre><span class="cmt">// ✅ Herencia correcta: un Gato ES UN Animal</span>
+<span class="kw">class</span> <span class="cls">Animal</span> { <span class="kw">void</span> <span class="mth">respirar</span>() {...} }
+<span class="kw">class</span> <span class="cls">Gato</span> <span class="kw">extends</span> <span class="cls">Animal</span> { <span class="kw">void</span> <span class="mth">maullar</span>() {...} }
+
+<span class="cmt">// ✅ Interfaz correcta: un Gato PUEDE hacer cosas</span>
+<span class="kw">interface</span> <span class="cls">Nadable</span>   { <span class="kw">void</span> <span class="mth">nadar</span>(); }
+<span class="kw">interface</span> <span class="cls">Escalable</span> { <span class="kw">void</span> <span class="mth">escalar</span>(); }
+
+<span class="cmt">// Un gato puede escalar (pero no nadar)</span>
+<span class="kw">class</span> <span class="cls">Gato</span> <span class="kw">extends</span> <span class="cls">Animal</span> <span class="kw">implements</span> <span class="cls">Escalable</span> {...}
+
+<span class="cmt">// Aplicado a nuestro sistema:</span>
+<span class="cmt">// ProcesadorPagoTarjeta NO ES UN IProcesadorPago</span>
+<span class="cmt">// ProcesadorPagoTarjeta PUEDE PROCESAR pagos</span>
+<span class="kw">class</span> <span class="cls">ProcesadorPagoTarjeta</span> <span class="kw">implements</span> <span class="cls">IProcesadorPago</span> {...} <span class="cmt">// ✅ Correcto</span></pre>
+    </div>
+
+    <p>Ahora la comparación directa entre los dos enfoques aplicados a nuestro sistema:</p>
+
+    <table class="compare-table">
+      <tr>
+        <th style="color:var(--dim)">Aspecto</th>
+        <th style="color:var(--red)">❌ Herencia (extends)</th>
+        <th style="color:var(--green)">✅ Interfaces (implements)</th>
+      </tr>
+      <tr>
+        <td><strong>Herencia múltiple</strong></td>
+        <td class="bad">Java solo permite 1 padre. Si usaras herencia, una clase no podría ser a la vez procesador de pago Y notificador.</td>
+        <td class="good">Una clase puede implementar múltiples interfaces sin límite.</td>
+      </tr>
+      <tr>
+        <td><strong>Acoplamiento</strong></td>
+        <td class="bad">Muy alto. Los hijos dependen de los detalles internos del padre. Un cambio en la clase base rompe a todos los hijos.</td>
+        <td class="good">Bajo. Solo se depende del contrato (firma de métodos), no de la implementación interna.</td>
+      </tr>
+      <tr>
+        <td><strong>Extensibilidad (OCP)</strong></td>
+        <td class="bad">Difícil. Para agregar PayPal tendrías que crear una subclase de la clase base de pagos y posiblemente modificarla.</td>
+        <td class="good">Fácil. Solo creas una nueva clase que implemente IProcesadorPago. Nada más cambia.</td>
+      </tr>
+      <tr>
+        <td><strong>Intercambiabilidad (LSP)</strong></td>
+        <td class="bad">Las subclases pueden sobrescribir comportamiento del padre de formas inesperadas, rompiendo sustituciones.</td>
+        <td class="good">Cualquier implementación es intercambiable porque todas cumplen el mismo contrato mínimo.</td>
+      </tr>
+      <tr>
+        <td><strong>Testabilidad</strong></td>
+        <td class="bad">Difícil de probar porque los hijos arrastran la lógica del padre. Crear mocks es complicado.</td>
+        <td class="good">Muy fácil. Para probar ServicioReservas puedes crear una implementación falsa de IProcesadorPago en segundos.</td>
+      </tr>
+      <tr>
+        <td><strong>Semántica</strong></td>
+        <td class="neu">Expresa "ES UN" (es-un-tipo-de).</td>
+        <td class="good">Expresa "PUEDE HACER" (tiene-una-capacidad).</td>
+      </tr>
+      <tr>
+        <td><strong>En nuestro sistema</strong></td>
+        <td class="bad">Si ProcesadorPagoTarjeta extendiese a ProcesadorBase, ServicioReservas dependería de ProcesadorBase y no podría aceptar PayPal sin modificarse.</td>
+        <td class="good">ServicioReservas acepta cualquier IProcesadorPago. No sabe ni le importa la jerarquía interna.</td>
+      </tr>
+    </table>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span style="background:#f87171"></span><span style="background:#fbbf24"></span><span style="background:#34d399"></span></div>
+        ❌ Cómo se vería con herencia (el problema)
+      </div>
+      <pre><span class="cmt">// Con herencia el sistema sería rígido:</span>
+<span class="kw">abstract class</span> <span class="cls">ProcesadorBase</span> {
+    <span class="kw">abstract boolean</span> <span class="mth">procesarPago</span>(<span class="typ">double</span> monto);
+    <span class="kw">void</span> <span class="mth">registrarLog</span>() { <span class="cmt">/* lógica compartida */</span> }
+}
+
+<span class="kw">class</span> <span class="cls">ProcesadorPagoTarjeta</span> <span class="kw">extends</span> <span class="cls">ProcesadorBase</span> { ... }
+<span class="kw">class</span> <span class="cls">ProcesadorPagoPaypal</span>  <span class="kw">extends</span> <span class="cls">ProcesadorBase</span> { ... }
+
+<span class="cmt">// ServicioReservas ahora depende de la clase concreta ProcesadorBase</span>
+<span class="kw">private</span> <span class="cls">ProcesadorBase</span> procesador; <span class="cmt">// ← Acoplado a la jerarquía</span>
+
+<span class="cmt">// ¿Qué pasa si mañana llega un procesador de una librería externa</span>
+<span class="cmt">// que NO puede extender ProcesadorBase? → No se puede integrar.</span></pre>
+    </div>
+
+    <div class="callout success">
+      <span class="callout-icon">🏆</span>
+      <div><strong>Regla práctica para recordar:</strong> <em>"Prefiere composición e interfaces sobre herencia"</em> es uno de los principios más citados en el libro "Design Patterns" (GoF). La herencia crea acoplamiento fuerte y jerarquías frágiles. Las interfaces crean contratos débilmente acoplados que escalan sin romperse.</div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- 9. RESUMEN GENERAL -->
+  <!-- ═══════════════════════════════════════════ -->
+  <section class="concept" id="resumen">
+    <div class="concept-header">
+      <div class="concept-icon" style="background:#3ecf8e15; border:1px solid #3ecf8e30; color:var(--green)">📊</div>
+      <div class="concept-title">
+        <h2>Resumen general</h2>
+        <div class="subtitle">Todo junto en una sola vista</div>
+      </div>
+    </div>
+
+    <table class="compare-table">
+      <tr>
+        <th style="color:var(--dim)">Concepto</th>
+        <th style="color:var(--dim)">¿Qué hace?</th>
+        <th style="color:var(--dim)">Ejemplo en el sistema</th>
+      </tr>
+      <tr>
+        <td><span class="chip chip-blue">private</span></td>
+        <td>Oculta el atributo o método fuera de la clase</td>
+        <td><code>private String idVuelo</code> en Vuelo</td>
+      </tr>
+      <tr>
+        <td><span class="chip chip-blue">final</span></td>
+        <td>El valor no puede cambiar una vez asignado</td>
+        <td><code>private final IRepositorioVuelos repo</code></td>
+      </tr>
+      <tr>
+        <td><span class="chip chip-purple">Encapsulamiento</span></td>
+        <td>Ocultar datos internos, exponer solo lo necesario</td>
+        <td>Todos los atributos son private con getters controlados</td>
+      </tr>
+      <tr>
+        <td><span class="chip chip-cyan">Getter / Setter</span></td>
+        <td>Métodos para leer y escribir atributos privados</td>
+        <td><code>getPrecio()</code>, <code>setAsientosDisponibles()</code></td>
+      </tr>
+      <tr>
+        <td><span class="chip chip-green">interface</span></td>
+        <td>Contrato: define el "qué" sin el "cómo"</td>
+        <td><code>IProcesadorPago</code>, <code>IServicioNotificacion</code></td>
+      </tr>
+      <tr>
+        <td><span class="chip chip-yellow">implements</span></td>
+        <td>La clase firma el contrato de la interfaz</td>
+        <td><code>ProcesadorPagoPaypal implements IProcesadorPago</code></td>
+      </tr>
+      <tr>
+        <td><span class="chip chip-orange">@Override</span></td>
+        <td>Indica que se sobreescribe un método de interfaz o padre</td>
+        <td>En todos los métodos que implementan interfaces</td>
+      </tr>
+      <tr>
+        <td><span class="chip chip-red">Inyección dep.</span></td>
+        <td>Las dependencias llegan por constructor, no se crean internamente</td>
+        <td>Constructor de <code>ServicioReservas</code></td>
+      </tr>
+      <tr>
+        <td><span class="chip chip-purple">Interface > Herencia</span></td>
+        <td>Bajo acoplamiento, herencia múltiple, más testeable</td>
+        <td>Todo el sistema usa interfaces en lugar de clases abstractas</td>
+      </tr>
+    </table>
+
+    <div class="callout info" style="margin-top:1.5rem">
+      <span class="callout-icon">🎓</span>
+      <div>
+        <strong>La gran idea detrás de todo:</strong> cada concepto de POO que usamos en este sistema existe para un mismo propósito: <strong>reducir el acoplamiento y aumentar la cohesión</strong>. Un sistema bien diseñado es aquel donde los cambios en una parte afectan lo menos posible al resto.
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  // Highlight active nav item on scroll
+  const sections = document.querySelectorAll('section[id]');
+  const navItems = document.querySelectorAll('.nav-item');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navItems.forEach(item => item.classList.remove('active'));
+        const active = document.querySelector(`.nav-item[href="#${entry.target.id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-30% 0px -60% 0px' });
+
+  sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>

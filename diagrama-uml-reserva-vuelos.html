@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diagrama UML — Sistema de Reserva de Vuelos</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;700;800&display=swap');
+
+  :root {
+    --bg: #0d0f14;
+    --panel: #13161e;
+    --border: #1e2330;
+    --accent-blue: #4f8ef7;
+    --accent-green: #3ecf8e;
+    --accent-orange: #f7934f;
+    --accent-purple: #b47cf7;
+    --accent-red: #f7545f;
+    --accent-yellow: #f7d44f;
+    --text: #e2e8f0;
+    --text-muted: #64748b;
+    --text-dim: #94a3b8;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── HEADER ── */
+  header {
+    padding: 2.5rem 3rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-start;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+  .header-title h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.9rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: #fff;
+    line-height: 1.1;
+  }
+  .header-title p {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    margin-top: 0.4rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .solid-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-left: auto;
+    align-items: center;
+  }
+  .badge {
+    padding: 0.3rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+  }
+  .badge:hover { transform: translateY(-2px); filter: brightness(1.2); }
+  .badge.srp  { background: #4f8ef720; border-color: #4f8ef740; color: var(--accent-blue); }
+  .badge.ocp  { background: #3ecf8e20; border-color: #3ecf8e40; color: var(--accent-green); }
+  .badge.lsp  { background: #f7934f20; border-color: #f7934f40; color: var(--accent-orange); }
+  .badge.isp  { background: #b47cf720; border-color: #b47cf740; color: var(--accent-purple); }
+  .badge.dip  { background: #f7d44f20; border-color: #f7d44f40; color: var(--accent-yellow); }
+
+  /* ── MAIN LAYOUT ── */
+  .main {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    min-height: calc(100vh - 100px);
+  }
+
+  /* ── DIAGRAM CANVAS ── */
+  .canvas {
+    padding: 2rem;
+    position: relative;
+    overflow: auto;
+  }
+
+  .uml-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 200px);
+    grid-template-rows: auto auto auto auto;
+    gap: 1.5rem 2rem;
+    min-width: 1120px;
+    position: relative;
+  }
+
+  /* ── CLASS CARDS ── */
+  .uml-class {
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--panel);
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    position: relative;
+  }
+  .uml-class:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.5);
+  }
+  .uml-class.active {
+    box-shadow: 0 0 0 2px currentColor;
+  }
+
+  .class-header {
+    padding: 0.6rem 0.8rem;
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .class-stereotype {
+    font-size: 0.55rem;
+    opacity: 0.7;
+    font-style: italic;
+  }
+  .class-name {
+    font-size: 0.72rem;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .class-section {
+    border-top: 1px solid var(--border);
+    padding: 0.5rem 0.8rem;
+  }
+  .class-section-title {
+    font-size: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    margin-bottom: 0.3rem;
+  }
+  .member {
+    font-size: 0.6rem;
+    color: var(--text-dim);
+    padding: 1px 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .member span { color: var(--text-muted); }
+
+  /* ── COLOR THEMES PER GROUP ── */
+  .type-modelo   .class-header { background: #4f8ef715; color: var(--accent-blue); }
+  .type-modelo   { border-color: #4f8ef730; }
+  .type-modelo.active { color: var(--accent-blue); }
+
+  .type-interface .class-header { background: #b47cf715; color: var(--accent-purple); }
+  .type-interface { border-color: #b47cf730; }
+  .type-interface.active { color: var(--accent-purple); }
+
+  .type-repositorio .class-header { background: #3ecf8e15; color: var(--accent-green); }
+  .type-repositorio { border-color: #3ecf8e30; }
+  .type-repositorio.active { color: var(--accent-green); }
+
+  .type-servicio .class-header { background: #f7934f15; color: var(--accent-orange); }
+  .type-servicio { border-color: #f7934f30; }
+  .type-servicio.active { color: var(--accent-orange); }
+
+  .type-pago .class-header { background: #f7d44f15; color: var(--accent-yellow); }
+  .type-pago { border-color: #f7d44f30; }
+  .type-pago.active { color: var(--accent-yellow); }
+
+  .type-notificacion .class-header { background: #f7545f15; color: var(--accent-red); }
+  .type-notificacion { border-color: #f7545f30; }
+  .type-notificacion.active { color: var(--accent-red); }
+
+  /* ── SVG CONNECTORS ── */
+  .connectors-svg {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    overflow: visible;
+  }
+
+  /* ── GRID POSITIONS ── */
+  /* Row 1: Modelos */
+  .pos-vuelo       { grid-column: 1; grid-row: 1; }
+  .pos-pasajero    { grid-column: 2; grid-row: 1; }
+  .pos-reserva     { grid-column: 3; grid-row: 1; }
+
+  /* Row 2: Interfaces */
+  .pos-irepo       { grid-column: 1; grid-row: 2; }
+  .pos-ipago       { grid-column: 3; grid-row: 2; }
+  .pos-inotif      { grid-column: 5; grid-row: 2; }
+
+  /* Row 3: Servicios */
+  .pos-busqueda    { grid-column: 1; grid-row: 3; }
+  .pos-reservas    { grid-column: 3; grid-row: 3; }
+
+  /* Row 4: Implementaciones */
+  .pos-repomem     { grid-column: 1; grid-row: 4; }
+  .pos-tarjeta     { grid-column: 2; grid-row: 4; }
+  .pos-paypal      { grid-column: 3; grid-row: 4; }
+  .pos-email       { grid-column: 4; grid-row: 4; }
+  .pos-sms         { grid-column: 5; grid-row: 4; }
+
+  /* ── SIDE PANEL ── */
+  .side-panel {
+    border-left: 1px solid var(--border);
+    background: var(--panel);
+    padding: 1.5rem;
+    overflow-y: auto;
+  }
+
+  .panel-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    margin-bottom: 1.2rem;
+  }
+
+  .info-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+  }
+  .info-card h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+  .info-card p {
+    font-size: 0.65rem;
+    line-height: 1.6;
+    color: var(--text-dim);
+  }
+  .info-card .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    margin-top: 0.6rem;
+  }
+  .info-tag {
+    font-size: 0.55rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: 3px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+  }
+  .tag-srp  { background: #4f8ef720; color: var(--accent-blue); }
+  .tag-ocp  { background: #3ecf8e20; color: var(--accent-green); }
+  .tag-lsp  { background: #f7934f20; color: var(--accent-orange); }
+  .tag-isp  { background: #b47cf720; color: var(--accent-purple); }
+  .tag-dip  { background: #f7d44f20; color: var(--accent-yellow); }
+
+  /* ── SOLID LEGEND ── */
+  .solid-legend {
+    margin-top: 1.5rem;
+  }
+  .legend-item {
+    display: flex;
+    gap: 0.8rem;
+    margin-bottom: 1rem;
+    padding: 0.8rem;
+    border-radius: 5px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .legend-item:hover { border-color: #2e3550; }
+  .legend-letter {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 800;
+    line-height: 1;
+    flex-shrink: 0;
+    width: 28px;
+    text-align: center;
+  }
+  .legend-content h4 {
+    font-size: 0.68rem;
+    font-weight: 700;
+    margin-bottom: 0.2rem;
+    color: var(--text);
+  }
+  .legend-content p {
+    font-size: 0.58rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  /* ── RELATION LEGEND ── */
+  .rel-legend {
+    margin-top: 1.5rem;
+  }
+  .rel-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.6rem;
+    color: var(--text-dim);
+  }
+  .rel-line {
+    width: 40px;
+    height: 2px;
+    flex-shrink: 0;
+    position: relative;
+  }
+  .rel-line.dashed { border-top: 2px dashed; }
+  .rel-line.solid-l { border-top: 2px solid; }
+  .rel-line::after {
+    content: '▶';
+    position: absolute;
+    right: -6px;
+    top: -8px;
+    font-size: 9px;
+  }
+  .rel-line.diamond::before {
+    content: '◆';
+    position: absolute;
+    left: -8px;
+    top: -8px;
+    font-size: 9px;
+  }
+
+  /* ── WELCOME PANEL ── */
+  #welcome-panel .info-card { border-color: #2e3550; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 1100px) {
+    .main { grid-template-columns: 1fr; }
+    .side-panel { border-left: none; border-top: 1px solid var(--border); }
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .uml-class { animation: fadeInUp 0.4s ease both; }
+  .uml-class:nth-child(2)  { animation-delay: 0.05s; }
+  .uml-class:nth-child(3)  { animation-delay: 0.10s; }
+  .uml-class:nth-child(4)  { animation-delay: 0.15s; }
+  .uml-class:nth-child(5)  { animation-delay: 0.20s; }
+  .uml-class:nth-child(6)  { animation-delay: 0.25s; }
+  .uml-class:nth-child(7)  { animation-delay: 0.30s; }
+  .uml-class:nth-child(8)  { animation-delay: 0.35s; }
+  .uml-class:nth-child(9)  { animation-delay: 0.40s; }
+  .uml-class:nth-child(10) { animation-delay: 0.45s; }
+  .uml-class:nth-child(11) { animation-delay: 0.50s; }
+  .uml-class:nth-child(12) { animation-delay: 0.55s; }
+  .uml-class:nth-child(13) { animation-delay: 0.60s; }
+
+  .highlight-pulse {
+    animation: pulse 0.6s ease;
+  }
+  @keyframes pulse {
+    0%   { box-shadow: 0 0 0 0 currentColor; }
+    50%  { box-shadow: 0 0 0 6px transparent; }
+    100% { box-shadow: 0 0 0 2px currentColor; }
+  }
+
+  /* Section labels */
+  .section-label {
+    grid-column: 1 / -1;
+    font-size: 0.55rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--text-muted);
+    padding: 0.2rem 0;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: -0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .section-label::before {
+    content: '';
+    display: inline-block;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+  .label-modelos     { color: var(--accent-blue); }
+  .label-interfaces  { color: var(--accent-purple); }
+  .label-servicios   { color: var(--accent-orange); }
+  .label-impl        { color: var(--accent-green); }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="header-title">
+    <h1>Sistema de Reserva de Vuelos</h1>
+    <p>Diagrama UML de Clases · Principios SOLID · POO</p>
+  </div>
+  <div class="solid-badges">
+    <span class="badge srp" onclick="highlightPrinciple('srp')">S — SRP</span>
+    <span class="badge ocp" onclick="highlightPrinciple('ocp')">O — OCP</span>
+    <span class="badge lsp" onclick="highlightPrinciple('lsp')">L — LSP</span>
+    <span class="badge isp" onclick="highlightPrinciple('isp')">I — ISP</span>
+    <span class="badge dip" onclick="highlightPrinciple('dip')">D — DIP</span>
+  </div>
+</header>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- CANVAS -->
+  <div class="canvas">
+    <div class="uml-grid" id="uml-grid">
+
+      <!-- ROW LABEL 1 -->
+      <div class="section-label label-modelos" style="grid-column:1/-1; grid-row:1; align-self:start; margin-bottom:0; margin-top:0; padding-bottom:0.4rem;">
+        Capa de Modelos (Entidades de datos)
+      </div>
+
+      <!-- MODELOS -->
+      <div class="uml-class type-modelo pos-vuelo" id="class-Vuelo" style="grid-row:2" data-srp data-info="vuelo" onclick="selectClass('Vuelo')">
+        <div class="class-header">
+          <span class="class-stereotype">«class»</span>
+          <span class="class-name">Vuelo</span>
+        </div>
+        <div class="class-section">
+          <div class="class-section-title">Atributos</div>
+          <div class="member">- idVuelo : String</div>
+          <div class="member">- origen : String</div>
+          <div class="member">- destino : String</div>
+          <div class="member">- fecha : LocalDate</div>
+          <div class="member">- precio : double</div>
+          <div class="member">- asientosDisp. : int</div>
+        </div>
+        <div class="class-section">
+          <div class="class-section-title">Métodos</div>
+          <div class="member">+ getIdVuelo() : String</div>
+          <div class="member">+ getPrecio() : double</div>
+          <div class="member">+ setAsientos(int)</div>
+          <div class="member">+ toString() : String</div>
+        </div>
+      </div>
+
+      <div class="uml-class type-modelo pos-pasajero" id="class-Pasajero" style="grid-row:2" data-srp data-info="pasajero" onclick="selectClass('Pasajero')">
+        <div class="class-header">
+          <span class="class-stereotype">«class»</span>
+          <span class="class-name">Pasajero</span>
+        </div>
+        <div class="class-section">
+          <div class="class-section-title">Atributos</div>
+          <div class="member">- idPasajero : String</div>
+          <div class="member">- nombre : String</div>
+          <div class="member">- correo : String</div>
+          <div class="member">- telefono : String</div>
+        </div>
+        <div class="class-section">
+          <div class="class-section-title">Métodos</div>
+          <div class="member">+ getNombre() : String</div>
+          <div class="member">+ getCorreo() : String</div>
+          <div class="member">+ getTelefono() : String</div>
+          <div class="member">+ toString() : String</div>
+        </div>
+      </div>
+
+      <div class="uml-class type-modelo pos-reserva" id="class-Reserva" style="grid-row:2" data-srp data-info="reserva" onclick="selectClass('Reserva')">
+        <div class="class-header">
+          <span class="class-stereotype">«class»</span>
+          <span class="class-name">Reserva</span>
+        </div>
+        <div class="class-section">
+          <div class="class-section-title">Atributos</div>
+          <div class="member">- idReserva : String</div>
+          <div class="member">- vuelo : Vuelo</div>
+          <div class="member">- pasajero : Pasajero</div>
+          <div class="member">- estado : String</div>
+          <div class="member">- costoTotal : double</div>
+        </div>
+        <div class="class-section">
+          <div class="class-section-title">Métodos</div>
+          <div class="member">+ getEstado() : String</div>
+          <div class="member">+ setEstado(String)</div>
+          <div class="member">+ toString() : String</div>
+        </div>
+      </div>
+
+      <!-- SPACER -->
+      <div style="grid-column:1/-1; grid-row:3; height:0.5rem;"></div>
+
+      <!-- ROW LABEL 2 -->
+      <div class="section-label label-interfaces" style="grid-column:1/-1; grid-row:4; align-self:start;">
+        Capa de Interfaces (Abstracciones — DIP + ISP)
+      </div>
+
+      <!-- INTERFACES -->
+      <div class="uml-class type-interface pos-irepo" id="class-IRepositorioVuelos" style="grid-row:5" data-isp data-dip data-info="irepo" onclick="selectClass('IRepositorioVuelos')">
+        <div class="class-header">
+          <span class="class-stereotype">«interface»</span>
+          <span class="class-name">IRepositorioVuelos</span>
+        </div>
+        <div class="class-section">
+          <div class="class-section-title">Métodos abstractos</div>
+          <div class="member">+ buscarPorDestinoYFecha()</div>
+          <div class="member">+ obtenerTodos() : List</div>
+          <div class="member">+ guardar(Vuelo)</div>
+        </div>
+      </div>
+
+      <div class="uml-class type-interface" id="class-IProcesadorPago" style="grid-column:3; grid-row:5" data-isp data-dip data-info="ipago" onclick="selectClass('IProcesadorPago')">
+        <div class="class-header">
+          <span class="class-stereotype">«interface»</span>
+          <span class="class-name">IProcesadorPago</span>
+        </div>
+        <div class="class-section">
+          <div class="class-section-title">Métodos abstractos</div>
+          <div class="member">+ procesarPago(double) : bool</div>
+        </div>
+      </div>
+
+      <div class="uml-class type-interface" id="class-IServicioNotificacion" style="grid-column:5; grid-row:5" data-isp data-dip data-info="inotif" onclick="selectClass('IServicioNotificacion')">
+        <div class="class-header">
+          <span class="class-stereotype">«interface»</span>
+          <span class="class-name">IServicioNotificacion</span>
+        </div>
+        <div class="class-section">
+          <div class="class-section-title">Métodos abstractos</div>
+          <div class="member">+ enviarNotificacion()</div>
+          <div class="member"><span style="font-size:0.55rem">  (destinatario, mensaje)</span></div>
+        </div>
+      </div>
+
+      <!-- SPACER -->
+      <div style="grid-column:1/-1; grid-row:6; height:0.5rem;"></div>
+
+      <!-- ROW LABEL 3 -->
+      <div class="section-label label-servicios" style="grid-column:1/-1; grid-row:7; align-self:start;">
+        Capa de Servicios (Lógica de negocio — SRP + DIP)
+      </div>
+
+      <!-- SERVICIOS -->
+      <div class="uml-class type-servicio" id="class-ServicioBusquedaVuelos" style="grid-column:1; grid-row:8" data-srp data-dip data-info="busqueda" onclick="selectClass('ServicioBusquedaVuelos')">
+        <div class="class-header">
+          <span class="class-stereotype">«service»</span>
+          <span class="class-name">ServicioBusquedaVuelos</span>
+        </div>
+        <div class="class-section">
+          <div class="class-section-title">Atributos</div>
+          <div class="member">- repositorio : IRepositorioVuelos</div>
+        </div>
+        <div class="class-section">
+          <div class="class-section-title">Métodos</div>
+          <div class="member">+ buscarVuelos(dest, fecha)</div>
+        </div>
+      </div>
+
+      <div class="uml-class type-servicio" id="class-ServicioReservas" style="grid-column:3; grid-row:8" data-srp data-dip data-info="srservicios" onclick="selectClass('ServicioReservas')">
+        <div class="class-header">
+          <span class="class-stereotype">«service»</span>
+          <span class="class-name">ServicioReservas</span>
+        </div>
+        <div class="class-section">
+          <div class="class-section-title">Atributos (inyectados)</div>
+          <div class="member">- repositorio : IRepositorioVuelos</div>
+          <div class="member">- procesador : IProcesadorPago</div>
+          <div class="member">- notificador : IServicioNotif.</div>
+        </div>
+        <div class="class-section">
+          <div class="class-section-title">Métodos</div>
+          <div class="member">+ reservarVuelo(Vuelo, Pasajero)</div>
+        </div>
+      </div>
+
+      <!-- SPACER -->
+      <div style="grid-column:1/-1; grid-row:9; height:0.5rem;"></div>
+
+      <!-- ROW LABEL 4 -->
+      <div class="section-label label-impl" style="grid-column:1/-1; grid-row:10; align-self:start;">
+        Capa de Implementaciones concretas (OCP + LSP)
+      </div>
+
+      <!-- IMPLEMENTACIONES -->
+      <div class="uml-class type-repositorio" id="class-RepositorioVuelosEnMemoria" style="grid-column:1; grid-row:11" data-srp data-ocp data-info="repomem" onclick="selectClass('RepositorioVuelosEnMemoria')">
+        <div class="class-header">
+          <span class="class-stereotype">«repository»</span>
+          <span class="class-name">RepositorioVuelos<br>EnMemoria</span>
+        </div>
+        <div class="class-section">
+          <div class="class-section-title">Atributos</div>
+          <div class="member">- listaVuelos : List&lt;Vuelo&gt;</div>
+        </div>
+        <div class="class-section">
+          <div class="class-section-title">Implementa</div>
+          <div class="member">+ buscarPorDestinoYFecha()</div>
+          <div class="member">+ obtenerTodos()</div>
+          <div class="member">+ guardar(Vuelo)</div>
+        </div>
+      </div>
+
+      <div class="uml-class type-pago" id="class-ProcesadorPagoTarjeta" style="grid-column:2; grid-row:11" data-ocp data-lsp data-info="tarjeta" onclick="selectClass('ProcesadorPagoTarjeta')">
+        <div class="class-header">
+          <span class="class-stereotype">«payment»</span>
+          <span class="class-name">ProcesadorPago<br>Tarjeta</span>
+        </div>
+        <div class="class-section">
+          <div class="class-section-title">Implementa</div>
+          <div class="member">+ procesarPago(double) : bool</div>
+        </div>
+      </div>
+
+      <div class="uml-class type-pago" id="class-ProcesadorPagoPaypal" style="grid-column:3; grid-row:11" data-ocp data-lsp data-info="paypal" onclick="selectClass('ProcesadorPagoPaypal')">
+        <div class="class-header">
+          <span class="class-stereotype">«payment»</span>
+          <span class="class-name">ProcesadorPago<br>Paypal</span>
+        </div>
+        <div class="class-section">
+          <div class="class-section-title">Implementa</div>
+          <div class="member">+ procesarPago(double) : bool</div>
+        </div>
+      </div>
+
+      <div class="uml-class type-notificacion" id="class-ServicioNotificacionEmail" style="grid-column:4; grid-row:11" data-ocp data-lsp data-info="email" onclick="selectClass('ServicioNotificacionEmail')">
+        <div class="class-header">
+          <span class="class-stereotype">«notification»</span>
+          <span class="class-name">ServicioNotificacion<br>Email</span>
+        </div>
+        <div class="class-section">
+          <div class="class-section-title">Implementa</div>
+          <div class="member">+ enviarNotificacion()</div>
+        </div>
+      </div>
+
+      <div class="uml-class type-notificacion" id="class-ServicioNotificacionSMS" style="grid-column:5; grid-row:11" data-ocp data-lsp data-info="sms" onclick="selectClass('ServicioNotificacionSMS')">
+        <div class="class-header">
+          <span class="class-stereotype">«notification»</span>
+          <span class="class-name">ServicioNotificacion<br>SMS</span>
+        </div>
+        <div class="class-section">
+          <div class="class-section-title">Implementa</div>
+          <div class="member">+ enviarNotificacion()</div>
+        </div>
+      </div>
+
+    </div><!-- /uml-grid -->
+
+    <!-- SVG CONNECTORS drawn by JS -->
+    <svg class="connectors-svg" id="connectors-svg"></svg>
+
+  </div><!-- /canvas -->
+
+  <!-- SIDE PANEL -->
+  <div class="side-panel">
+    <div class="panel-title">📋 Información</div>
+
+    <div id="info-panel">
+      <div id="welcome-panel">
+        <div class="info-card">
+          <h3 style="color:var(--text)">Haz clic en cualquier clase</h3>
+          <p>Selecciona una clase del diagrama para ver sus detalles, responsabilidad y qué principios SOLID aplica.</p>
+          <p style="margin-top:0.5rem">También puedes hacer clic en los botones S O L I D del encabezado para resaltar las clases que implementan cada principio.</p>
+        </div>
+
+        <div class="solid-legend">
+          <div class="panel-title" style="margin-bottom:0.8rem">Principios SOLID</div>
+
+          <div class="legend-item">
+            <div class="legend-letter" style="color:var(--accent-blue)">S</div>
+            <div class="legend-content">
+              <h4>Single Responsibility</h4>
+              <p>Cada clase tiene una sola razón para cambiar. Vuelo solo es datos, ServicioBusquedaVuelos solo busca.</p>
+            </div>
+          </div>
+
+          <div class="legend-item">
+            <div class="legend-letter" style="color:var(--accent-green)">O</div>
+            <div class="legend-content">
+              <h4>Open / Closed</h4>
+              <p>Abierto para extensión, cerrado para modificación. Puedes agregar ProcesadorPagoCrypto sin tocar ServicioReservas.</p>
+            </div>
+          </div>
+
+          <div class="legend-item">
+            <div class="legend-letter" style="color:var(--accent-orange)">L</div>
+            <div class="legend-content">
+              <h4>Liskov Substitution</h4>
+              <p>Cualquier implementación de IProcesadorPago puede reemplazar a otra sin romper el sistema.</p>
+            </div>
+          </div>
+
+          <div class="legend-item">
+            <div class="legend-letter" style="color:var(--accent-purple)">I</div>
+            <div class="legend-content">
+              <h4>Interface Segregation</h4>
+              <p>Interfaces pequeñas y específicas. Nadie implementa métodos que no necesita.</p>
+            </div>
+          </div>
+
+          <div class="legend-item">
+            <div class="legend-letter" style="color:var(--accent-yellow)">D</div>
+            <div class="legend-content">
+              <h4>Dependency Inversion</h4>
+              <p>ServicioReservas depende de interfaces, no de ProcesadorPagoTarjeta o ServicioNotificacionEmail directamente.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="rel-legend" style="margin-top:1.5rem">
+          <div class="panel-title" style="margin-bottom:0.8rem">Tipos de relaciones</div>
+          <div class="rel-item">
+            <div class="rel-line dashed" style="border-color:#b47cf7; color:#b47cf7"></div>
+            <span>Realización (implementa interfaz)</span>
+          </div>
+          <div class="rel-item">
+            <div class="rel-line solid-l" style="border-color:#f7934f; color:#f7934f"></div>
+            <span>Dependencia (usa abstracción)</span>
+          </div>
+          <div class="rel-item">
+            <div class="rel-line solid-l diamond" style="border-color:#4f8ef7; color:#4f8ef7"></div>
+            <span>Composición (contiene)</span>
+          </div>
+        </div>
+
+        <div class="rel-legend" style="margin-top:1.2rem">
+          <div class="panel-title" style="margin-bottom:0.8rem">Multiplicidad</div>
+          <div class="info-card" style="padding:0.7rem">
+            <table style="width:100%; border-collapse:collapse; font-size:0.6rem; color:var(--text-dim)">
+              <tr style="border-bottom:1px solid var(--border)">
+                <td style="padding:3px 6px; font-weight:700; color:var(--text)">Notación</td>
+                <td style="padding:3px 6px; color:var(--text)">Significado</td>
+              </tr>
+              <tr><td style="padding:3px 6px; color:var(--accent-blue)">1</td><td style="padding:3px 6px">Exactamente uno</td></tr>
+              <tr><td style="padding:3px 6px; color:var(--accent-green)">0..1</td><td style="padding:3px 6px">Cero o uno (opcional)</td></tr>
+              <tr><td style="padding:3px 6px; color:var(--accent-orange)">1..*</td><td style="padding:3px 6px">Uno o más</td></tr>
+              <tr><td style="padding:3px 6px; color:var(--accent-purple)">0..*</td><td style="padding:3px 6px">Cero o más</td></tr>
+            </table>
+            <p style="margin-top:0.6rem; font-size:0.58rem; line-height:1.5; color:var(--text-muted)">
+              Las implementaciones muestran <strong style="color:var(--accent-orange)">1..*</strong> porque una interfaz puede tener muchas implementaciones (OCP), pero en ejecución se usa <strong style="color:var(--accent-blue)">1</strong> a la vez (DIP).
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /side-panel -->
+</div><!-- /main -->
+
+<script>
+// ── CLASS INFO DATA ──────────────────────────────────────────────
+const classInfo = {
+  Vuelo: {
+    title: 'Vuelo',
+    color: 'var(--accent-blue)',
+    tipo: 'Clase concreta · Modelo',
+    desc: 'Representa un vuelo como entidad de datos pura. No contiene lógica de negocio, solo almacena y expone la información de un vuelo.',
+    responsabilidad: 'Almacenar los datos de un vuelo (origen, destino, fecha, precio, asientos disponibles).',
+    principios: ['srp'],
+    porque: 'SRP: La única razón para modificar Vuelo es si cambia la estructura de datos de un vuelo. No sabe nada de pagos, reservas ni notificaciones.'
+  },
+  Pasajero: {
+    title: 'Pasajero',
+    color: 'var(--accent-blue)',
+    tipo: 'Clase concreta · Modelo',
+    desc: 'Representa al pasajero con su información personal. Es una entidad de datos sin lógica de negocio.',
+    responsabilidad: 'Almacenar los datos del pasajero (nombre, correo, teléfono).',
+    principios: ['srp'],
+    porque: 'SRP: Solo cambia si la estructura de datos del pasajero cambia.'
+  },
+  Reserva: {
+    title: 'Reserva',
+    color: 'var(--accent-blue)',
+    tipo: 'Clase concreta · Modelo',
+    desc: 'Agrupa un Vuelo y un Pasajero con un ID de reserva, estado y costo total. Representa el resultado de una operación de reserva.',
+    responsabilidad: 'Representar la relación entre un vuelo reservado y el pasajero que lo reservó.',
+    principios: ['srp'],
+    porque: 'SRP: Solo cambia si la estructura de una reserva cambia. La lógica de crearla está en ServicioReservas, no aquí.'
+  },
+  IRepositorioVuelos: {
+    title: 'IRepositorioVuelos',
+    color: 'var(--accent-purple)',
+    tipo: '«interface» · Contrato',
+    desc: 'Define el contrato de acceso a datos para vuelos. Cualquier clase que implemente esta interfaz puede ser usada como fuente de datos sin cambiar los servicios.',
+    responsabilidad: 'Definir cómo se accede al almacenamiento de vuelos, sin importar si es memoria, base de datos o API.',
+    principios: ['isp', 'dip'],
+    porque: 'ISP: Interfaz pequeña con solo los métodos necesarios para vuelos.\nDIP: Los servicios dependen de esta abstracción, nunca de la implementación.'
+  },
+  IProcesadorPago: {
+    title: 'IProcesadorPago',
+    color: 'var(--accent-purple)',
+    tipo: '«interface» · Contrato',
+    desc: 'Contrato mínimo para cualquier sistema de pago. Define un solo método: procesarPago(). ServicioReservas no sabe qué procesador se está usando.',
+    responsabilidad: 'Definir el contrato de procesamiento de pagos.',
+    principios: ['isp', 'dip', 'ocp'],
+    porque: 'ISP: Un solo método, nada más.\nDIP: ServicioReservas depende de esta interfaz.\nOCP: Nuevos procesadores se agregan implementando esta interfaz.'
+  },
+  IServicioNotificacion: {
+    title: 'IServicioNotificacion',
+    color: 'var(--accent-purple)',
+    tipo: '«interface» · Contrato',
+    desc: 'Contrato para el envío de notificaciones. Puede ser Email, SMS, WhatsApp o cualquier otro medio sin cambiar ServicioReservas.',
+    responsabilidad: 'Definir el contrato de envío de notificaciones.',
+    principios: ['isp', 'dip', 'ocp'],
+    porque: 'ISP: Un solo método enviarNotificacion().\nDIP: ServicioReservas depende de esta interfaz, no de Email ni SMS.'
+  },
+  ServicioBusquedaVuelos: {
+    title: 'ServicioBusquedaVuelos',
+    color: 'var(--accent-orange)',
+    tipo: '«service» · Lógica de negocio',
+    desc: 'Su única función es buscar vuelos disponibles según destino y fecha. Delega el acceso a datos al repositorio inyectado.',
+    responsabilidad: 'Buscar vuelos disponibles — nada más.',
+    principios: ['srp', 'dip'],
+    porque: 'SRP: Solo se encarga de búsqueda, no de reservar ni notificar.\nDIP: Recibe IRepositorioVuelos en su constructor, no instancia el repositorio directamente.'
+  },
+  ServicioReservas: {
+    title: 'ServicioReservas',
+    color: 'var(--accent-orange)',
+    tipo: '«service» · Coordinador',
+    desc: 'Orquesta el proceso de reserva completo: verifica disponibilidad, delega el pago y la notificación. Es el núcleo del sistema.',
+    responsabilidad: 'Coordinar los pasos de una reserva (verificar, pagar, notificar).',
+    principios: ['srp', 'dip'],
+    porque: 'SRP: Coordina pero no procesa pagos ni envía notificaciones directamente.\nDIP: Sus 3 dependencias son interfaces inyectadas por constructor, nunca clases concretas.'
+  },
+  RepositorioVuelosEnMemoria: {
+    title: 'RepositorioVuelosEnMemoria',
+    color: 'var(--accent-green)',
+    tipo: '«repository» · Implementación',
+    desc: 'Implementación concreta de IRepositorioVuelos que almacena vuelos en una lista en memoria. Ideal para pruebas y demos.',
+    responsabilidad: 'Gestionar el almacenamiento de vuelos en memoria RAM.',
+    principios: ['srp', 'ocp'],
+    porque: 'OCP: Si se necesita una base de datos real, se crea RepositorioVuelosMySQL sin modificar esta clase ni los servicios.\nSRP: Solo almacena y consulta vuelos.'
+  },
+  ProcesadorPagoTarjeta: {
+    title: 'ProcesadorPagoTarjeta',
+    color: 'var(--accent-yellow)',
+    tipo: '«payment» · Implementación',
+    desc: 'Implementa IProcesadorPago para pagos con tarjeta de crédito. Puede integrarse con una pasarela real sin afectar ServicioReservas.',
+    responsabilidad: 'Procesar pagos con tarjeta de crédito.',
+    principios: ['ocp', 'lsp'],
+    porque: 'OCP: Se agregó sin modificar código existente.\nLSP: Puede usarse en cualquier lugar donde se espere IProcesadorPago sin romper el sistema.'
+  },
+  ProcesadorPagoPaypal: {
+    title: 'ProcesadorPagoPaypal',
+    color: 'var(--accent-yellow)',
+    tipo: '«payment» · Implementación',
+    desc: 'Implementa IProcesadorPago para pagos con PayPal. Intercambiable con ProcesadorPagoTarjeta sin cambiar ServicioReservas.',
+    responsabilidad: 'Procesar pagos mediante PayPal.',
+    principios: ['ocp', 'lsp'],
+    porque: 'OCP: Nueva forma de pago sin editar código existente.\nLSP: Es completamente intercambiable con cualquier otro IProcesadorPago.'
+  },
+  ServicioNotificacionEmail: {
+    title: 'ServicioNotificacionEmail',
+    color: 'var(--accent-red)',
+    tipo: '«notification» · Implementación',
+    desc: 'Implementa IServicioNotificacion enviando notificaciones por correo electrónico. Se puede integrar con SendGrid o JavaMail.',
+    responsabilidad: 'Enviar notificaciones por correo electrónico.',
+    principios: ['srp', 'ocp', 'lsp'],
+    porque: 'SRP: Solo envía emails.\nOCP: Añadida sin modificar interfaz ni servicios.\nLSP: Sustituible por cualquier IServicioNotificacion.'
+  },
+  ServicioNotificacionSMS: {
+    title: 'ServicioNotificacionSMS',
+    color: 'var(--accent-red)',
+    tipo: '«notification» · Implementación',
+    desc: 'Implementa IServicioNotificacion enviando SMS. Se puede integrar con Twilio sin afectar ServicioReservas.',
+    responsabilidad: 'Enviar notificaciones por SMS.',
+    principios: ['srp', 'ocp', 'lsp'],
+    porque: 'OCP: Canal de notificación nuevo sin modificar código existente.\nLSP: Intercambiable con ServicioNotificacionEmail.'
+  },
+};
+
+const principleColors = {
+  srp: 'var(--accent-blue)',
+  ocp: 'var(--accent-green)',
+  lsp: 'var(--accent-orange)',
+  isp: 'var(--accent-purple)',
+  dip: 'var(--accent-yellow)',
+};
+
+const principleNames = {
+  srp: 'SRP — Single Responsibility',
+  ocp: 'OCP — Open / Closed',
+  lsp: 'LSP — Liskov Substitution',
+  isp: 'ISP — Interface Segregation',
+  dip: 'DIP — Dependency Inversion',
+};
+
+// ── SELECT CLASS ──────────────────────────────────────────────────
+let activeClass = null;
+
+function selectClass(name) {
+  // deselect previous
+  document.querySelectorAll('.uml-class').forEach(el => {
+    el.classList.remove('active', 'highlight-pulse');
+  });
+
+  const info = classInfo[name];
+  if (!info) return;
+
+  const el = document.getElementById('class-' + name);
+  if (el) {
+    el.classList.add('active', 'highlight-pulse');
+    el.style.color = info.color;
+  }
+  activeClass = name;
+
+  // Build panel
+  const tagMap = { srp:'tag-srp', ocp:'tag-ocp', lsp:'tag-lsp', isp:'tag-isp', dip:'tag-dip' };
+  const tagLabels = { srp:'SRP', ocp:'OCP', lsp:'LSP', isp:'ISP', dip:'DIP' };
+
+  const tagsHtml = info.principios.map(p =>
+    `<span class="info-tag ${tagMap[p]}">${tagLabels[p]}</span>`
+  ).join('');
+
+  document.getElementById('info-panel').innerHTML = `
+    <div class="info-card" style="border-color:${info.color}40">
+      <h3 style="color:${info.color}">${info.title}</h3>
+      <p style="color:var(--text-muted); font-size:0.6rem; margin-bottom:0.5rem">${info.tipo}</p>
+      <p>${info.desc}</p>
+      <div class="tags">${tagsHtml}</div>
+    </div>
+    <div class="info-card">
+      <h3 style="color:var(--text); font-size:0.72rem">📌 Responsabilidad</h3>
+      <p style="margin-top:0.3rem">${info.responsabilidad}</p>
+    </div>
+    <div class="info-card">
+      <h3 style="color:var(--text); font-size:0.72rem">🔍 ¿Por qué SOLID?</h3>
+      <p style="margin-top:0.3rem; white-space:pre-line">${info.porque}</p>
+    </div>
+    <button onclick="document.getElementById('info-panel').innerHTML = document.getElementById('welcome-panel').outerHTML; clearSelection()"
+      style="width:100%; margin-top:0.5rem; padding:0.5rem; background:var(--bg); border:1px solid var(--border); color:var(--text-muted); border-radius:4px; cursor:pointer; font-family:inherit; font-size:0.65rem; letter-spacing:0.05em;">
+      ← Volver al índice
+    </button>
+  `;
+}
+
+function clearSelection() {
+  document.querySelectorAll('.uml-class').forEach(el => {
+    el.classList.remove('active', 'highlight-pulse');
+    el.style.color = '';
+  });
+  activeClass = null;
+}
+
+// ── HIGHLIGHT PRINCIPLE ──────────────────────────────────────────
+function highlightPrinciple(p) {
+  document.querySelectorAll('.uml-class').forEach(el => {
+    el.classList.remove('active', 'highlight-pulse');
+    el.style.color = '';
+    if (el.dataset[p] !== undefined) {
+      el.classList.add('active', 'highlight-pulse');
+      el.style.color = principleColors[p];
+    }
+  });
+
+  // Show which classes apply this principle
+  const matching = Object.entries(classInfo)
+    .filter(([,v]) => v.principios.includes(p))
+    .map(([k,v]) => `<li style="margin-bottom:0.4rem; cursor:pointer; color:var(--text-dim)" onclick="selectClass('${k}')">${v.title}</li>`)
+    .join('');
+
+  document.getElementById('info-panel').innerHTML = `
+    <div class="info-card" style="border-color:${principleColors[p]}40">
+      <h3 style="color:${principleColors[p]}">${principleNames[p]}</h3>
+    </div>
+    <div class="info-card">
+      <h3 style="font-size:0.7rem; margin-bottom:0.5rem">Clases que aplican este principio:</h3>
+      <ul style="list-style:none; font-size:0.65rem">
+        ${matching}
+      </ul>
+    </div>
+    <button onclick="document.querySelectorAll('.uml-class').forEach(e=>{e.classList.remove('active','highlight-pulse');e.style.color='';}); document.getElementById('info-panel').innerHTML = welcomeHTML;"
+      style="width:100%; margin-top:0.5rem; padding:0.5rem; background:var(--bg); border:1px solid var(--border); color:var(--text-muted); border-radius:4px; cursor:pointer; font-family:inherit; font-size:0.65rem; letter-spacing:0.05em;">
+      ← Limpiar selección
+    </button>
+  `;
+}
+
+// Store original welcome HTML for reset
+let welcomeHTML = '';
+window.addEventListener('load', () => {
+  welcomeHTML = document.getElementById('info-panel').innerHTML;
+  drawConnectors();
+});
+
+// ── DRAW SVG CONNECTORS ──────────────────────────────────────────
+function drawConnectors() {
+  const svg = document.getElementById('connectors-svg');
+  const canvasEl = document.querySelector('.canvas');
+  const canvasRect = canvasEl.getBoundingClientRect();
+
+  function getPos(id) {
+    const el = document.getElementById(id);
+    if (!el) return null;
+    const r = el.getBoundingClientRect();
+    const sx = canvasEl.scrollLeft, sy = canvasEl.scrollTop;
+    return {
+      cx:     r.left - canvasRect.left + r.width / 2 + sx,
+      cy:     r.top  - canvasRect.top  + r.height / 2 + sy,
+      top:    r.top  - canvasRect.top  + sy,
+      bottom: r.top  - canvasRect.top  + r.height + sy,
+      left:   r.left - canvasRect.left + sx,
+      right:  r.left - canvasRect.left + r.width + sx,
+    };
+  }
+
+  const FONT = `font-family="'JetBrains Mono',monospace" font-size="9" font-weight="600"`;
+
+  function label(x, y, text, color, anchor='middle', dy=0) {
+    return `<text x="${x}" y="${y + dy}" text-anchor="${anchor}" fill="${color}" ${FONT} opacity="0.9"
+      style="paint-order:stroke" stroke="#0d0f14" stroke-width="3" stroke-linejoin="round">${text}</text>`;
+  }
+
+  function makeDefs() {
+    return `<defs>
+      <marker id="arr-dep"  markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+        <path d="M0,0 L0,6 L8,3 z" fill="#f7934f"/>
+      </marker>
+      <marker id="arr-impl" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+        <path d="M0,0 L0,6 L8,3 z" fill="none" stroke="#b47cf7" stroke-width="1.2"/>
+      </marker>
+      <marker id="arr-comp" markerWidth="10" markerHeight="8" refX="2" refY="3" orient="auto">
+        <path d="M0,3 L4,0 L8,3 L4,6 z" fill="#4f8ef7"/>
+      </marker>
+    </defs>`;
+  }
+
+  // ── Vertical bezier with multiplicity labels ──────────────────
+  function drawV(fromId, toId, color, dashed, marker, multFrom, multTo) {
+    const f = getPos(fromId), t = getPos(toId);
+    if (!f || !t) return '';
+    const my = (f.bottom + t.top) / 2;
+    const path = `<path d="M${f.cx},${f.bottom} C${f.cx},${my} ${t.cx},${my} ${t.cx},${t.top}"
+      fill="none" stroke="${color}" stroke-width="1.5" opacity="0.7"
+      ${dashed ? 'stroke-dasharray="6,3"' : ''}
+      marker-end="url(#${marker})"/>`;
+    // multFrom near origin (bottom of source), multTo near target (top of target)
+    const lFrom = label(f.cx + 8, f.bottom + 14, multFrom, color, 'start');
+    const lTo   = label(t.cx + 8, t.top   - 6,  multTo,   color, 'start');
+    return path + lFrom + lTo;
+  }
+
+  // ── Horizontal line with multiplicity labels ──────────────────
+  function drawH(fromId, toId, color, dashed, marker, multFrom, multTo) {
+    const f = getPos(fromId), t = getPos(toId);
+    if (!f || !t) return '';
+    const goRight = f.cx < t.cx;
+    const x1 = goRight ? f.right : f.left;
+    const x2 = goRight ? t.left  : t.right;
+    const path = `<path d="M${x1},${f.cy} L${x2},${t.cy}"
+      fill="none" stroke="${color}" stroke-width="1.5" opacity="0.7"
+      ${dashed ? 'stroke-dasharray="6,3"' : ''}
+      marker-start="url(#arr-comp)"
+      marker-end="url(#${marker})"/>`;
+    // multFrom near x1, multTo near x2
+    const offX = goRight ? 8 : -8;
+    const anchor1 = goRight ? 'start' : 'end';
+    const anchor2 = goRight ? 'end'   : 'start';
+    const lFrom = label(x1 + offX,  f.cy - 8, multFrom, color, anchor1);
+    const lTo   = label(x2 - offX,  t.cy - 8, multTo,   color, anchor2);
+    return path + lFrom + lTo;
+  }
+
+  const classes = [
+    'class-Reserva','class-Vuelo','class-Pasajero',
+    'class-IRepositorioVuelos','class-IProcesadorPago','class-IServicioNotificacion',
+    'class-ServicioBusquedaVuelos','class-ServicioReservas',
+    'class-RepositorioVuelosEnMemoria','class-ProcesadorPagoTarjeta',
+    'class-ProcesadorPagoPaypal','class-ServicioNotificacionEmail','class-ServicioNotificacionSMS'
+  ];
+  // pre-fetch positions
+  classes.forEach(id => getPos(id)); // warm up
+
+  const C_IMPL = '#b47cf7';
+  const C_DEP  = '#f7934f';
+  const C_COMP = '#4f8ef7';
+
+  let out = makeDefs();
+
+  // ── COMPOSICIÓN: Reserva ◆──► Vuelo  (1 a 1) ─────────────────
+  out += drawH('class-Reserva', 'class-Vuelo',    C_COMP, false, 'arr-comp', '1', '1');
+  out += drawH('class-Reserva', 'class-Pasajero', C_COMP, false, 'arr-comp', '1', '1');
+
+  // ── DEPENDENCIA: Servicios ──► Interfaces (1 usa 1) ──────────
+  out += drawV('class-ServicioBusquedaVuelos', 'class-IRepositorioVuelos',  C_DEP, false, 'arr-dep', '1', '1');
+  out += drawV('class-ServicioReservas',       'class-IRepositorioVuelos',  C_DEP, false, 'arr-dep', '1', '1');
+  out += drawV('class-ServicioReservas',       'class-IProcesadorPago',     C_DEP, false, 'arr-dep', '1', '1');
+  out += drawV('class-ServicioReservas',       'class-IServicioNotificacion', C_DEP, false, 'arr-dep', '1', '1');
+
+  // ── REALIZACIÓN: Implementaciones - - ► Interfaces ───────────
+  // Cada interfaz puede tener 1..* implementaciones (OCP/LSP)
+  out += drawV('class-RepositorioVuelosEnMemoria',  'class-IRepositorioVuelos',    C_IMPL, true, 'arr-impl', '1..*', '1');
+  out += drawV('class-ProcesadorPagoTarjeta',        'class-IProcesadorPago',       C_IMPL, true, 'arr-impl', '1..*', '1');
+  out += drawV('class-ProcesadorPagoPaypal',          'class-IProcesadorPago',       C_IMPL, true, 'arr-impl', '1..*', '1');
+  out += drawV('class-ServicioNotificacionEmail',    'class-IServicioNotificacion', C_IMPL, true, 'arr-impl', '1..*', '1');
+  out += drawV('class-ServicioNotificacionSMS',      'class-IServicioNotificacion', C_IMPL, true, 'arr-impl', '1..*', '1');
+
+  svg.innerHTML = out;
+}
+
+window.addEventListener('resize', drawConnectors);
+</script>
+</body>
+</html>
